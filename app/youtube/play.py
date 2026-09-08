@@ -13,13 +13,13 @@ def get_vid(query):
     request = urllib.request.Request(
       url,
       headers={
-        "User-Agent": "Mozilla/5.0'
+        "User-Agent": "Mozilla/5.0"
       }
     )
     data = urllib.request.urlopen(
       request,
       timeout=5
-    ).read().decode("utf-8, errors = "ignore")
+    ).read().decode("utf-8", errors="ignore")
     
      ids = re.findall(
           r'"videoID":"([^"]+)"',
