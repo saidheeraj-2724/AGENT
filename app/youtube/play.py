@@ -54,6 +54,8 @@ def create_youtube_url(command):
        break
 
 query = query.strip()
-video_id = get_vid
+video_id = get_vid(query)
+if not video:
+  return None
 
 
