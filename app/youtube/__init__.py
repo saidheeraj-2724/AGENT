@@ -1,50 +1,75 @@
-from flask import Blueprint, request, jsonify
-
-from app.youtube.player import create_youtube_url
-
-
-youtube_bp = Blueprint(
-    "youtube",
-    __name__
-)
+import re
+import urllib.parse
+import urllib.request
 
 
-@youtube_bp.route(
-    "/play",
-    methods=["POST"]
-)
-def play():
+def get_vid(query):
 
-    data = request.get_json(
-        silent=True
-    ) or {}
+    try:
+        encoded = urllib.parse.quote(query)
 
-    command = data.get(
-        "command",
-        ""
-    ).strip()
+        url = (
+            "https://www.youtube.com/results"
+            "?search_query=" + encoded
+        )
 
-    if not command:
+        request = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0"
+            }
+        )
 
-        return jsonify({
-            "success": False,
-            "message": "Song name is required"
-        }), 400
+        data = urllib.request.urlopen(
+            request,
+            timeout=5
+        ).read().decode("utf-8", errors="ignore")
 
-    url = create_youtube_url(
-        command
+        ids = re.findall(
+            r'"videoId":"([^"]+)"',
+            data
+        )
+
+        return ids[0] if ids else None
+
+    except Exception:
+        return None
+
+
+def create_youtube_url(command):
+
+    text = command.lower().strip()
+
+    patterns = [
+        r"play\s+song\s+(.+)",
+        r"play\s+music\s+(.+)",
+        r"play\s+(.+)",
+        r"youtube\s+(.+)"
+    ]
+
+    query = command
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            text
+        )
+
+        if match:
+
+            query = match.group(1)
+            break
+
+    query = query.strip()
+
+    video_id = get_vid(query)
+
+    if not video_id:
+        return None
+
+    return (
+        "https://www.youtube.com/embed/"
+        + video_id
+        + "?autoplay=1&mute=0"
     )
-
-    if not url:
-
-        return jsonify({
-            "success": False,
-            "message": "Could not find the song"
-        }), 404
-
-    return jsonify({
-        "success": True,
-        "type": "youtube",
-        "query": command,
-        "url": url
-    })
