@@ -4,6 +4,7 @@ import urllib.request
 
 
 def get_vid(query):
+
     try:
         encoded = urllib.parse.quote(query)
 
@@ -25,7 +26,7 @@ def get_vid(query):
         ).read().decode("utf-8", errors="ignore")
 
         ids = re.findall(
-            r'"videoID":"([^"]+)"',
+            r'"videoId":"([^"]+)"',
             data
         )
 
@@ -36,24 +37,27 @@ def get_vid(query):
 
 
 def create_youtube_url(command):
+
     text = command.lower().strip()
 
     patterns = [
         r"play\s+song\s+(.+)",
         r"play\s+music\s+(.+)",
         r"play\s+(.+)",
-        r"youtube\s+(.+)",
+        r"youtube\s+(.+)"
     ]
 
     query = command
 
     for pattern in patterns:
+
         match = re.search(
             pattern,
             text
         )
 
         if match:
+
             query = match.group(1)
             break
 
