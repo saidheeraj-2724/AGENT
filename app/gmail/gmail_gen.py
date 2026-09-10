@@ -32,5 +32,33 @@ You are a proffessional Gmail email writing assistant.
   <email body>
 
   User command:
-  {command}
-  
+  {comman}
+  """
+
+      url = (
+          f"https://generativelanguage.googleapis.com/"
+          f"vlbeta/models/{MODEL}:generateContent"
+      )
+
+      payload = {
+          "contents":[{"parts": [{"text": prompt}]}],
+          "generationConfig: {
+              "temperature": 0.7,
+               "maxOutputTokens: 800
+          }
+      }
+
+      req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode(),
+        headers={
+          "Content-Type":"application/json",
+          "x-goog-api-key": API_KEY
+        },
+        method="POST"
+      )
+
+   for attemp in range(4):
+     try:
+       with urllib.request.urlopen(req, timeout=30) as response:
+         data = json.loads(response.read().decode())
